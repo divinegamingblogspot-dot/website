@@ -1,0 +1,3 @@
+/* MultiByte */
+Site: MultiByte Technology Store
+Platform: Static ecommerce frontend with optional Node API
