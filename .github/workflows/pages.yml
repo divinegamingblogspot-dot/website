@@ -26,7 +26,7 @@ jobs:
           curl --fail http://127.0.0.1:8787/api/dashboard
       - name: Validate pages
         run: |
-          for f in index.html cart.html checkout.html account.html faq.html policies.html wishlist.html compare.html track.html returns.html admin.html; do test -s "$f"; done
+          for f in index.html cart.html checkout.html account.html faq.html policies.html wishlist.html compare.html track.html returns.html admin.html sw.js manifest.webmanifest; do test -s "$f"; done
       - name: Validate feature wiring
         run: |
           grep -qi "WhatsApp" index.html
@@ -37,3 +37,7 @@ jobs:
           grep -q "/api/quotes" server.js
           grep -q "/api/rmas" server.js
           grep -q "sitemap" robots.txt
+          grep -q "mbCreateDemoOrder" app.js
+          grep -q "mbGenerateInvoice" app.js
+          grep -q "serviceWorker" index.html
+          grep -q "delivery pincode" checkout.html
