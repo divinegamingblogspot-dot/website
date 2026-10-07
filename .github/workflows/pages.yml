@@ -40,4 +40,4 @@ jobs:
           grep -q "mbCreateDemoOrder" app.js
           grep -q "mbGenerateInvoice" app.js
           grep -q "serviceWorker" index.html
-          grep -q "delivery pincode" checkout.html
+          grep -qi "delivery pincode" checkout.html
