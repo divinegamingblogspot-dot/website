@@ -1,0 +1,3 @@
+Contact: mailto:security@multybyte.com
+Preferred-Languages: en
+Policy: /policies.html
