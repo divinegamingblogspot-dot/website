@@ -1,12 +1,17 @@
-name: Validate MultiByte ecommerce
+name: MultiByte Pages Build and Deploy
 on:
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
 jobs:
-  validate:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,26 +23,42 @@ jobs:
           node --check app.js
           node --check cart-page.js
           node --check server.js
-      - name: Start API
+      - name: Start API smoke test
         run: |
           node server.js > /tmp/mb-api.log 2>&1 &
           sleep 1
           curl --fail http://127.0.0.1:8787/api/health
           curl --fail http://127.0.0.1:8787/api/dashboard
-      - name: Validate pages
+      - name: Validate storefront
         run: |
-          for f in index.html cart.html checkout.html account.html faq.html policies.html wishlist.html compare.html track.html returns.html admin.html sw.js manifest.webmanifest; do test -s "$f"; done
+          for f in index.html cart.html checkout.html account.html faq.html policies.html wishlist.html compare.html track.html returns.html admin.html 404.html offline.html sw.js manifest.webmanifest; do test -s "$f"; done
       - name: Validate feature wiring
         run: |
           grep -qi "WhatsApp" index.html
           grep -q "wishlist" app.js
           grep -q "mb-compare" app.js
           grep -q "bulkDiscount" app.js
-          grep -q "/api/orders" server.js
-          grep -q "/api/quotes" server.js
-          grep -q "/api/rmas" server.js
-          grep -q "sitemap" robots.txt
           grep -q "mbCreateDemoOrder" app.js
           grep -q "mbGenerateInvoice" app.js
           grep -q "serviceWorker" index.html
           grep -qi "delivery pincode" checkout.html
+          grep -q "/api/orders" server.js
+          grep -q "/api/quotes" server.js
+          grep -q "/api/rmas" server.js
+          grep -q "sitemap" robots.txt
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
