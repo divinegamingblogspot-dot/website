@@ -1,4 +1,4 @@
-name: Validate MultiByte website
+name: Validate MultiByte ecommerce
 on:
   push:
     branches: [main]
@@ -10,23 +10,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
       - name: Validate JavaScript
         run: |
           node --check app.js
           node --check cart-page.js
-      - name: Validate required pages
+          node --check server.js
+      - name: Start API
         run: |
-          test -s index.html
-          test -s cart.html
-          test -s checkout.html
-          test -s account.html
-          test -s faq.html
-          test -s policies.html
-          test -s style.css
-      - name: Validate ecommerce features
+          node server.js > /tmp/mb-api.log 2>&1 &
+          sleep 1
+          curl --fail http://127.0.0.1:8787/api/health
+          curl --fail http://127.0.0.1:8787/api/dashboard
+      - name: Validate pages
         run: |
-          grep -q "WhatsApp" index.html
-          grep -q "checkout" index.html
+          for f in index.html cart.html checkout.html account.html faq.html policies.html wishlist.html compare.html track.html returns.html admin.html; do test -s "$f"; done
+      - name: Validate feature wiring
+        run: |
+          grep -qi "WhatsApp" index.html
           grep -q "wishlist" app.js
-          grep -q "localStorage" app.js
+          grep -q "mb-compare" app.js
+          grep -q "bulkDiscount" app.js
+          grep -q "/api/orders" server.js
+          grep -q "/api/quotes" server.js
+          grep -q "/api/rmas" server.js
           grep -q "sitemap" robots.txt
