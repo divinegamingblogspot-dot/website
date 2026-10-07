@@ -49,3 +49,10 @@ function showAccount(tab){let data;if(tab==="orders")data='<b>No real orders yet
 $("accountBtn").onclick=()=>{showAccount("orders");openModal("accountModal")};
 $("newsletterForm").addEventListener("submit",e=>{e.preventDefault();toast("You're subscribed");e.target.reset()});
 $("quoteForm").addEventListener("submit",e=>{e.preventDefault();toast("Bulk enquiry created");setTimeout(()=>closeModal("quoteModal"),500);e.target.reset()});
+
+function addToCompare(id){let c=JSON.parse(localStorage.getItem("mb-compare")||"[]");if(!c.includes(id)&&c.length<4)c.push(id);localStorage.setItem("mb-compare",JSON.stringify(c));toast(c.length>=4?"Compare list full":"Added to compare")}
+function bulkDiscount(total){return total>=25000?.07:total>=10000?.03:0}
+function cartDiscount(){const total=cart.reduce((s,id)=>s+(products.find(p=>p.id===id)?.price||0),0);return bulkDiscount(total)}
+function coupon(code,total){const c=String(code||"").trim().toUpperCase();if(c==="WELCOME10"&&total>=2000)return Math.min(total*.1,500);if(c==="BULK5"&&total>=5000)return total*.05;return 0}
+function smartProductSearch(q){q=String(q||"").toLowerCase();const nums=q.match(/(?:under|below|less than)\s*₹?\s*(\d+)/);return products.filter(p=>(!nums||p.price<=+nums[1])&&([p.name,p.cat,p.sku,p.desc].join(" ").toLowerCase().includes(q.replace(nums?.[0]||"","").trim())||q.split(/\s+/).every(w=>[p.name,p.cat,p.sku,p.desc].join(" ").toLowerCase().includes(w)))).slice(0,20)}
+localStorage.setItem("mb-feature-version","2.0");
