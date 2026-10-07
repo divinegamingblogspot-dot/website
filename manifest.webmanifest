@@ -1,0 +1,9 @@
+{
+  "name": "MultiByte Tech Store",
+  "short_name": "MultiByte",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2457e6",
+  "description": "MultiByte technology and security products store"
+}
