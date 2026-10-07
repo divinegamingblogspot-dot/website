@@ -56,3 +56,17 @@ function cartDiscount(){const total=cart.reduce((s,id)=>s+(products.find(p=>p.id
 function coupon(code,total){const c=String(code||"").trim().toUpperCase();if(c==="WELCOME10"&&total>=2000)return Math.min(total*.1,500);if(c==="BULK5"&&total>=5000)return total*.05;return 0}
 function smartProductSearch(q){q=String(q||"").toLowerCase();const nums=q.match(/(?:under|below|less than)\s*₹?\s*(\d+)/);return products.filter(p=>(!nums||p.price<=+nums[1])&&([p.name,p.cat,p.sku,p.desc].join(" ").toLowerCase().includes(q.replace(nums?.[0]||"","").trim())||q.split(/\s+/).every(w=>[p.name,p.cat,p.sku,p.desc].join(" ").toLowerCase().includes(w)))).slice(0,20)}
 localStorage.setItem("mb-feature-version","2.0");
+
+/* MultiByte static commerce engine */
+const MB={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+function mbOrderTotal(items){return items.reduce((s,x)=>{const p=products.find(p=>p.id==x.id);return s+(p?.price||0)*(x.qty||1)},0)}
+function mbGST(total,rate=18){return +(total*rate/100).toFixed(2)}
+function mbDelivery(total,pincode){if(!/^\d{6}$/.test(String(pincode||"")))return {ok:false,fee:0,message:"Enter a valid 6-digit pincode"};return {ok:true,fee:total>=1999?0:99,message:total>=1999?"Free delivery":"₹99 delivery"}}
+function mbSaveOrder(order){const orders=MB.get("mb-orders",[]);orders.unshift(order);MB.set("mb-orders",orders);MB.set("mb-last-order",order.id);return order}
+function mbCreateDemoOrder(data){const id="MB"+Date.now().toString().slice(-8);const subtotal=Number(data.subtotal||0),discount=Number(data.discount||0),shipping=Number(data.shipping||0),gst=mbGST(subtotal-discount);return mbSaveOrder({...data,id,subtotal,discount,shipping,gst,total:subtotal-discount+shipping+gst,status:"Order received",createdAt:new Date().toISOString(),timeline:[["Order received",new Date().toISOString()],["Payment pending",null],["Packed",null],["Shipped",null],["Delivered",null]]})}
+function mbExport(key,file){const blob=new Blob([JSON.stringify(MB.get(key,[]),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=file;a.click()}
+function mbClearDemoData(){["mb-cart","mb-wishlist","mb-compare","mb-orders","mb-last-order","mb-last-rma","mb-viewed","mb-customer","mb-notifications"].forEach(k=>localStorage.removeItem(k));location.reload()}
+function mbNotify(text){const n=MB.get("mb-notifications",[]);n.unshift({text,at:new Date().toISOString(),read:false});MB.set("mb-notifications",n)}
+function mbRecordView(id){const v=MB.get("mb-viewed",[]).filter(x=>x!==id);v.unshift(id);MB.set("mb-viewed",v.slice(0,12))}
+function mbRecentlyViewed(){return MB.get("mb-viewed",[]).map(id=>products.find(p=>p.id==id)).filter(Boolean)}
+function mbGenerateInvoice(order){const lines=["MULTIBYTE — DEMO INVOICE","Order: "+order.id,"Date: "+new Date(order.createdAt).toLocaleString("en-IN"),"Subtotal: ₹"+order.subtotal.toLocaleString("en-IN"),"Discount: ₹"+order.discount.toLocaleString("en-IN"),"GST: ₹"+order.gst.toLocaleString("en-IN"),"Shipping: ₹"+order.shipping.toLocaleString("en-IN"),"TOTAL: ₹"+order.total.toLocaleString("en-IN")];const blob=new Blob([lines.join("\n")],{type:"text/plain"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=order.id+"-invoice.txt";a.click()}
