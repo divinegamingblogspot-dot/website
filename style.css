@@ -25,3 +25,6 @@ body{background:var(--soft);color:var(--ink)}.header{background:color-mix(in srg
 [data-theme="midnight"] .header{border-color:var(--line)}[data-theme="midnight"] .productImg,[data-theme="midnight"] .editCard{background:linear-gradient(145deg,#33272f,#2b2229)}
 @media(max-width:900px){.catalogGrid,.productGrid{grid-template-columns:repeat(3,minmax(0,1fr))}.editGrid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.pageWrap{padding:34px 4% 100px}.catalogGrid,.productGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.editGrid{grid-template-columns:1fr 1fr}.quickBtn{opacity:1;transform:none;bottom:8px;padding:8px;font-size:11px}.productInfo{padding:11px}.productInfo h3{font-size:14px}.filters{width:100%}.filters input,.filters select{flex:1;min-width:130px}.themePanel{right:12px;bottom:76px}.themeMenu{width:220px}}
+
+.categoryHero{margin:22px 0;padding:26px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(110deg,var(--hero),var(--soft));display:flex;flex-direction:column;gap:7px}.categoryHero span{font-size:10px;letter-spacing:2px;color:var(--accent);font-weight:800}.categoryHero b{font:700 30px "Playfair Display"}.categoryHero small{color:var(--muted);max-width:700px;line-height:1.6}
+@media(max-width:640px){.categoryHero{padding:20px}.categoryHero b{font-size:24px}}
